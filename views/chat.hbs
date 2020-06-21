@@ -1,0 +1,76 @@
+<div class="container">
+	<h3 class="text-center" id="room-name"></h3>
+	<div class="messaging">
+		<div class="inbox_msg">
+			<!-- the whole sidebar div -->
+			<div class="inbox_people">
+				<div class="headind_srch">
+					<div class="recent_heading">
+						<h4>Online users</h4>
+					</div>
+					<div class="srch_bar">
+						<div class="stylish-input-group">
+							<input type="text" class="search-bar" id="search-bar" placeholder="Search" />
+							<span class="input-group-addon">
+								<button type="button"><i class="fa fa-search" aria-hidden="true"></i></button>
+							</span>
+						</div>
+					</div>
+				</div>
+				<!-- users in sidebar -->
+				<div class="inbox_chat">
+					<!-- users -->
+					<div id="div-online-users">
+						<!-- active member(dont need it i guess) -->
+						{{!-- <div class="chat_list active_chat">
+							<div class="chat_people">
+								<div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png" alt="sunil" /></div>
+								<div class="chat_ib">
+									<h5>alae touba <span class="chat_date">Dec 25</span></h5>
+									<p>Test, which is a new approach to have all solutions astrology under one roof.</p>
+								</div>
+							</div>
+						</div> --}}
+						{{!-- <div class="chat_list">
+							<div class="chat_people">
+								<div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png" alt="sunil" /></div>
+								<div class="chat_ib">
+									<h5>alae touba <span class="chat_date">Dec 25</span></h5>
+									<p>Test, which is a new approach to have all solutions astrology under one roof.</p>
+								</div>
+							</div>
+						</div> --}}
+					</div>
+				</div>
+				<!-- end of users in sidebar -->
+			</div>
+			<!-- /end of whole sidebar div -->
+			<!-- messages -->
+			<div class="mesgs">
+				<div class="msg_history" id="msgs">
+					<!-- divs messages -->
+				</div>
+				<!-- type message form -->
+				<div class="type_msg">
+					<div class="input_msg_write">
+						<input type="text" class="write_msg" id="input-message" placeholder="Type a message" />
+						<button class="msg_send_btn" type="button" id="btn-send-message">
+							{{!-- <i class="fa fa-paper-plane-o" aria-hidden="true"></i> --}}
+							<i class="fas fa-location-arrow" aria-hidden="true"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		{{!<p class="text-center top_spac">Design by <a target="_blank" href="#">alae touba</a></p>}}
+	</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.3/qs.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	//user is an object containing infos that the user has entered when he wanted to join a room
+	//this value is passed here when we render this page
+	const currentUser = {{{ user }}}
+</script>
+<script src="/js/chat.js"></script>

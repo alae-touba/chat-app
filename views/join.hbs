@@ -1,0 +1,69 @@
+<div class="container">
+    <div class="row d-flex justify-content-around">
+        <div class="col-md-5" style="border: 1px solid #c7cdd1; border-radius: 3px; padding: 20px;">
+            <h1 class="text-center font-weight-bold">
+                <i class="fas fa-sign-in-alt"></i>
+                Join an existing room
+            </h1>
+            {{#if errorsInExistingRoomForm}}
+                {{#each errorsInExistingRoomForm}}
+                    <div class="alert alert-warning">{{this.msg}}</div>
+                {{/each}}
+            {{/if}}
+            <form action="/join-existing-room" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="username" class="text-capitalize" style="font-size: 16px;">username</label> <br />
+                    <input type="text" id="username" class="form-control" name="username" placeholder="enter your username" />
+                </div>
+                <span class="text-capitalize" style="font-size: 16px;">Select a room</span>
+                <select name="room" class="custom-select mb-3 mt-2">
+                    {{#each rooms}}
+                        <option value="{{this}}">{{this}}</option>
+                    {{/each}}
+                </select>
+                <div class="form-group">
+                    <label for="quote" class="text-capitalize" style="font-size: 16px;">quote</label> <br />
+                    <input type="text" id="quote" class="form-control" name="quote" placeholder="enter a quote(Optional)" />
+                </div>
+                <span class="text-capitalize" style="font-size: 16px;">profile image</span>
+                <div class="custom-file mb-3 mt-2">
+                    <input type="file" class="custom-file-input" name="image" {{!--required--}}>
+                    <label class="custom-file-label">Choose profile image...</label>
+                </div>
+                <button type="submit" class="btn btn-block" style="background: #05728f; color: white; font-weight: bold;">join</button>
+            </form>
+        </div>
+        <div class="col-md-5" style="border: 1px solid #c7cdd1; border-radius: 3px; padding: 20px;">
+            <h1 class="text-center font-weight-bold">
+                <i class="fas fa-sign-in-alt"></i>
+                Create a room
+            </h1>
+            {{#if errorsInNewRoomForm}}
+                {{#each errorsInNewRoomForm}}
+                    <div class="alert alert-warning">{{ this.msg }}</div>
+                {{/each}}
+                <p><a href="/"> see available rooms </a></p>
+            {{/if}}
+            <form action="/join-new-room1" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="username" class="text-capitalize" style="font-size: 16px;">username</label> <br />
+                    <input type="text" id="username" class="form-control" name="username" placeholder="enter your username" />
+                </div>
+                <div class="form-group">
+                    <label for="room" class="text-capitalize" style="font-size: 16px;">room</label> <br />
+                    <input type="text" id="room" class="form-control" name="room" placeholder="enter the name of the room" />
+                </div>
+                <div class="form-group">
+                    <label for="quote" class="text-capitalize" style="font-size: 16px;">quote</label> <br />
+                    <input type="text" id="quote" class="form-control" name="quote" placeholder="enter a quote(Optional)" />
+                </div>
+                <span class="text-capitalize" style="font-size: 16px;">profile image</span>
+                <div class="custom-file mb-3 mt-2">
+                    <input type="file" class="custom-file-input" name="image" {{!--required--}}>
+                    <label class="custom-file-label">Choose profile image...</label>
+                </div>
+                <button type="submit" class="btn btn-block" style="background: #05728f; color: white; font-weight: bold;">join</button>
+            </form>
+        </div>
+    </div>
+</div>
