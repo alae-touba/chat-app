@@ -15,8 +15,10 @@ const updateSidebarUi = (users) => {
 		const newDiv = document.createElement("div")
 		newDiv.className = "chat_list"
 
+		let color = "black"
 		if (user.username === currentUser.username) {
 			newDiv.className += " active_chat"
+			color = "green"
 		}
 
 		newDiv.innerHTML = `
@@ -29,8 +31,8 @@ const updateSidebarUi = (users) => {
 		}" alt="profile default image"/>
 					</div>
 					<div class="chat_ib">
-						<h5>
-							${user.username} <span class="chat_date"> ${getFormatedTime(user.joinTime)} </span>
+						<h5 style="color:${color};">
+							${user.username} <span class="chat_date" style="color:black;"> ${getFormatedTime(user.joinTime)} </span>
 						</h5>
 						<p>${user.quote} </p>
 					</div>
@@ -116,6 +118,12 @@ btnSendMessage.addEventListener("click", (e) => {
 
 // new user wants to join a specific room
 socket.emit("join", currentUser)
+
+socket.on("see-chat-history", (t) => {
+	for (const el of t) {
+		appendIncomingMessage(el.user, el.message, el.time)
+	}
+})
 
 socket.on("welcome-event", ({ user, message, time }) => {
 	appendIncomingMessage(user, message, time)

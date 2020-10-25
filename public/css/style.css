@@ -118,6 +118,7 @@ img {
 
 .active_chat {
 	background: #ebebeb;
+	/* background-color: #97ccf7; */
 }
 
 .incoming_msg_img {

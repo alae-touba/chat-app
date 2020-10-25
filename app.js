@@ -36,7 +36,7 @@ const storage = multer.diskStorage({
 	},
 	filename: function (req, file, cb) {
 		cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
-	},
+	}
 })
 
 const upload = multer({ storage: storage })
@@ -53,7 +53,7 @@ app.get("/", (req, res, next) => {
 const validateFormFields = () => {
 	return [
 		validator.check("username").isLength({ min: 1 }).withMessage("username canot be empty"),
-		validator.check("room").isLength({ min: 1 }).withMessage("room name cannot be empty"),
+		validator.check("room").isLength({ min: 1 }).withMessage("room name cannot be empty")
 	]
 }
 
@@ -70,7 +70,7 @@ app.post("/join-existing-room", upload.single("image"), validateFormFields(), (r
 		if (isUserAlreadyExists) {
 			res.render("join", {
 				errorsInExistingRoomForm: [{ msg: `this username '${req.body.username}' is already in use in room '${req.body.room}' ` }],
-				rooms: getAvailableRooms(users),
+				rooms: getAvailableRooms(users)
 			})
 		} else {
 			res.render("chat", {
@@ -79,9 +79,9 @@ app.post("/join-existing-room", upload.single("image"), validateFormFields(), (r
 					room: req.body.room.trim().toLowerCase(),
 					joinTime: new Date().getTime(),
 					imageName: req.file ? req.file.filename : "default.png", //req.file is undefinded if no file is submited
-					quote: req.body.quote,
+					quote: req.body.quote
 				}),
-				title: "Chat Room: " + req.body.room.trim().toLowerCase(),
+				title: "Chat Room: " + req.body.room.trim().toLowerCase()
 			})
 		}
 	}
@@ -104,9 +104,9 @@ app.post("/join-new-room1", upload.single("image"), validateFormFields(), (req, 
 					room: req.body.room.trim().toLowerCase(),
 					joinTime: new Date().getTime(),
 					imageName: req.file ? req.file.filename : "default.png",
-					quote: req.body.quote,
+					quote: req.body.quote
 				}),
-				title: "Chat Room: " + req.body.room.trim().toLowerCase(),
+				title: "Chat Room: " + req.body.room.trim().toLowerCase()
 			})
 		}
 	}
@@ -129,9 +129,9 @@ app.post("/join-new-room2", upload.single("image"), validateFormFields(), (req, 
 					room: req.body.room.trim().toLowerCase(),
 					joinTime: new Date().getTime(),
 					imageName: req.file ? req.file.filename : "default.png",
-					quote: req.body.quote,
+					quote: req.body.quote
 				}),
-				title: "Chat Room: " + req.body.room.trim().toLowerCase(),
+				title: "Chat Room: " + req.body.room.trim().toLowerCase()
 			})
 		}
 	}
@@ -153,6 +153,14 @@ app.use((err, req, res, next) => {
 	res.render("error")
 })
 
+/*
+	{
+		"roomX": [ {user:userX, message: "#msg#", time: #time#}, ... ],
+		....
+	}
+*/
+let RoomChatHistory = {}
+
 io.on("connection", (socket) => {
 	//console.log("new websocket connection")
 
@@ -162,10 +170,24 @@ io.on("connection", (socket) => {
 		addUser(users, user)
 
 		socket.join(user.room)
+
+		// if (RoomChatHistory[user.room]) {
+		// 	console.log(RoomChatHistory[user.room])
+		// }
+		if (!RoomChatHistory[user.room]) {
+			RoomChatHistory[user.room] = []
+		}
+		RoomChatHistory[user.room].push({
+			user: admin,
+			message: `${user.username} joined the chat!`,
+			time: new Date().getTime()
+		})
+
+		socket.emit("see-chat-history", RoomChatHistory[user.room].slice(0, RoomChatHistory[user.room].length - 1))
 		socket.emit("welcome-event", sendData(admin, `weclome ${user.username}!`))
 
-		//broadcast the msg(a new user has joins) to all sockets (except sender) in the room
-		socket.broadcast.to(user.room).emit("new-user-joins", sendData(admin, `${user.username} has join the chat!`))
+		//broadcast the msg(a new user joined) to all sockets (except sender) in the room
+		socket.broadcast.to(user.room).emit("new-user-joins", sendData(admin, `${user.username} joined the chat!`))
 
 		//send event to update UI of online users in this room
 		io.to(user.room).emit("update-ui-of-online-users", getUsersInRoom(users, user.room))
@@ -174,6 +196,16 @@ io.on("connection", (socket) => {
 	socket.on("send-message", (message) => {
 		const user = getUser(users, socket.id)
 		if (user) {
+			if (!RoomChatHistory[user.room]) {
+				RoomChatHistory[user.room] = []
+			}
+
+			RoomChatHistory[user.room].push({
+				user,
+				message,
+				time: new Date().getTime()
+			})
+
 			// sending to all clients in -user.room- room except sender
 			socket.broadcast.to(user.room).emit("message", sendData(user, message))
 		}
@@ -188,21 +220,32 @@ io.on("connection", (socket) => {
 		const removedUser = removeUser(users, socket.id)
 
 		if (removedUser) {
-			//a user has left the room
+			//a user left the room
+
+			const r = getUsersInRoom(users, removedUser.room)
+			if (r.length === 0) {
+				delete RoomChatHistory[removedUser.room]
+			} else {
+				RoomChatHistory[removedUser.room].push({
+					user: admin,
+					message: `${removedUser.username} left the chat!`,
+					time: new Date().getTime()
+				})
+			}
 
 			//=> send the message to others(all users in his room)
-			io.to(removedUser.room).emit("user-lefts", sendData(admin, `${removedUser.username} has lefts the chat!`))
+			io.to(removedUser.room).emit("user-lefts", sendData(admin, `${removedUser.username} left the chat!`))
 
 			//=> send event to update UI of online users in this room
 			io.to(removedUser.room).emit("update-ui-of-online-users", getUsersInRoom(users, removedUser.room))
 
-			if (removedUser.imageName !== "default.png") {
-				fs.unlink(path.join(__dirname, "public", "uploads", "images", removedUser.imageName), (err) => {
-					if (err) {
-						throw err
-					}
-				})
-			}
+			// if (removedUser.imageName !== "default.png") {
+			// 	fs.unlink(path.join(__dirname, "public", "uploads", "images", removedUser.imageName), (err) => {
+			// 		if (err) {
+			// 			throw err
+			// 		}
+			// 	})
+			// }
 		}
 	})
 })
