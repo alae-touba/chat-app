@@ -9,7 +9,15 @@ const socketio = require("socket.io")
 const validator = require("express-validator")
 const fs = require("fs")
 
-const { getAvailableRooms, getUsersInRoom, addUser, getUser, removeUser, sendData, admin } = require("./utils/chat-utils")
+const {
+	getAvailableRooms,
+	getUsersInRoom,
+	addUser,
+	getUser,
+	removeUser,
+	sendData,
+	admin
+} = require("./utils/chat-utils")
 
 const app = express()
 const server = http.createServer(app)
@@ -26,7 +34,6 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, "public")))
 
-//users
 const users = []
 
 //multer
@@ -63,13 +70,23 @@ app.post("/join-existing-room", upload.single("image"), validateFormFields(), (r
 
 	if (!errors.isEmpty()) {
 		//res.render("join-new-room", { errorsInExistingRoomForm: errors.array() });
-		res.render("join", { errorsInExistingRoomForm: errors.array(), rooms: getAvailableRooms(users), title: "Join A Room" })
+		res.render("join", {
+			errorsInExistingRoomForm: errors.array(),
+			rooms: getAvailableRooms(users),
+			title: "Join A Room"
+		})
 	} else {
-		const isUserAlreadyExists = users.find((user) => user.username === req.body.username && user.room === req.body.room)
+		const isUserAlreadyExists = users.find(
+			(user) => user.username === req.body.username && user.room === req.body.room
+		)
 
 		if (isUserAlreadyExists) {
 			res.render("join", {
-				errorsInExistingRoomForm: [{ msg: `this username '${req.body.username}' is already in use in room '${req.body.room}' ` }],
+				errorsInExistingRoomForm: [
+					{
+						msg: `this username '${req.body.username}' is already in use in room '${req.body.room}' `
+					}
+				],
 				rooms: getAvailableRooms(users)
 			})
 		} else {
@@ -92,11 +109,20 @@ app.post("/join-new-room1", upload.single("image"), validateFormFields(), (req, 
 	const errors = validator.validationResult(req)
 
 	if (!errors.isEmpty()) {
-		res.render("join", { errorsInNewRoomForm: errors.array(), rooms: getAvailableRooms(users), title: "Join A Room" })
+		res.render("join", {
+			errorsInNewRoomForm: errors.array(),
+			rooms: getAvailableRooms(users),
+			title: "Join A Room"
+		})
 	} else {
 		const rooms = getAvailableRooms(users)
 		if (rooms.includes(req.body.room)) {
-			res.render("join", { errorsInNewRoomForm: [{ msg: `there is already a room by the name of '${req.body.room}' ` }], title: "Join A Room" })
+			res.render("join", {
+				errorsInNewRoomForm: [
+					{ msg: `there is already a room by the name of '${req.body.room}' ` }
+				],
+				title: "Join A Room"
+			})
 		} else {
 			res.render("chat", {
 				user: JSON.stringify({
@@ -121,7 +147,9 @@ app.post("/join-new-room2", upload.single("image"), validateFormFields(), (req, 
 	} else {
 		const rooms = getAvailableRooms(users)
 		if (rooms.includes(req.body.room)) {
-			res.render("join-new-room", { errors: [{ msg: `there is already a room by the name of '${req.body.room}' ` }] })
+			res.render("join-new-room", {
+				errors: [{ msg: `there is already a room by the name of '${req.body.room}' ` }]
+			})
 		} else {
 			res.render("chat", {
 				user: JSON.stringify({
@@ -183,11 +211,16 @@ io.on("connection", (socket) => {
 			time: new Date().getTime()
 		})
 
-		socket.emit("see-chat-history", RoomChatHistory[user.room].slice(0, RoomChatHistory[user.room].length - 1))
+		socket.emit(
+			"see-chat-history",
+			RoomChatHistory[user.room].slice(0, RoomChatHistory[user.room].length - 1)
+		)
 		socket.emit("welcome-event", sendData(admin, `weclome ${user.username}!`))
 
 		//broadcast the msg(a new user joined) to all sockets (except sender) in the room
-		socket.broadcast.to(user.room).emit("new-user-joins", sendData(admin, `${user.username} joined the chat!`))
+		socket.broadcast
+			.to(user.room)
+			.emit("new-user-joins", sendData(admin, `${user.username} joined the chat!`))
 
 		//send event to update UI of online users in this room
 		io.to(user.room).emit("update-ui-of-online-users", getUsersInRoom(users, user.room))
@@ -234,10 +267,16 @@ io.on("connection", (socket) => {
 			}
 
 			//=> send the message to others(all users in his room)
-			io.to(removedUser.room).emit("user-lefts", sendData(admin, `${removedUser.username} left the chat!`))
+			io.to(removedUser.room).emit(
+				"user-lefts",
+				sendData(admin, `${removedUser.username} left the chat!`)
+			)
 
 			//=> send event to update UI of online users in this room
-			io.to(removedUser.room).emit("update-ui-of-online-users", getUsersInRoom(users, removedUser.room))
+			io.to(removedUser.room).emit(
+				"update-ui-of-online-users",
+				getUsersInRoom(users, removedUser.room)
+			)
 
 			// if (removedUser.imageName !== "default.png") {
 			// 	fs.unlink(path.join(__dirname, "public", "uploads", "images", removedUser.imageName), (err) => {
