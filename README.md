@@ -17,6 +17,7 @@ Users can:
 
 # Use It Locally
 
+* Make sure you have Nodejs installed
 * Download the project into the filesystem
 * Unzip it
 * Open the terminal & run
